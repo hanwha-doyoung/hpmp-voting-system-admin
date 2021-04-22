@@ -1,6 +1,7 @@
 import { Injectable } from '@nestjs/common';
 import { isNullOrUndefined } from 'util';
 import {
+    CryptoUtil,
     CustomLoggerService,
     ExternalServerException,
     TransactionUtil
@@ -13,6 +14,7 @@ import {
     IEbfSendTransactionResponse,
     IEbfSendViewRequest, IEbfSendViewResponse
 } from "./dto/ebf-external-transaction.dto";
+import {IAccount} from "../dto/account.dto";
 
 @Injectable()
 export class EbfExternalTransactionService {
@@ -72,6 +74,20 @@ export class EbfExternalTransactionService {
         };
     }
 
+
+    public async createAccount(): Promise<IAccount> {
+        const requestUrl: string = `/account/create`;
+        let param = {"passphrase" : "1234"};
+        let result = await this.sendTransactionToEbf(requestUrl, param);
+        return <IAccount>{
+            address: result.address,
+            keystore: result.keystore,
+            privateKey: result.privateKey,
+        };
+    }
+    public encodeAccount(account: IAccount): string {
+        return CryptoUtil.encBase64(JSON.stringify(account.keystore));
+    }
 
     private async sendTransactionToEbf(url: string, param: Object): Promise<any> {
         const requestUrl: string = `${this.configService.server.ebfServerPrefix}/${url}`;

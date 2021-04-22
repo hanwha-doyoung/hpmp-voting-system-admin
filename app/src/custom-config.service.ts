@@ -1,5 +1,5 @@
 import { Injectable } from '@nestjs/common';
-import {ConfigService, getOsEnv, toNumber} from "@hanwha-blockchain/hc-core-hchain-framework-js";
+import {ConfigService, getOsEnv, toBool, toNumber} from "@hanwha-blockchain/hc-core-hchain-framework-js";
 
 @Injectable()
 export class CustomConfigService extends ConfigService {
@@ -9,8 +9,15 @@ export class CustomConfigService extends ConfigService {
         socketTimeout: number;
     }
 
-    contract: {
-        filePath: string;
+    database: {
+        type: string;
+        host: string;
+        port: string;
+        username: string;
+        password: string;
+        database: string;
+        synchronize: boolean;
+        logging: boolean;
     }
 
     constructor(filePath: string) {
@@ -22,9 +29,17 @@ export class CustomConfigService extends ConfigService {
             socketTimeout: toNumber(getOsEnv('SOCKET_TIMEOUT')),
         };
 
-        // this.contract = {
-        //     filePath: getOsEnv('CONTRACT_FILE_PATH'),
-        // };
+        this.database = {
+            type: `${getOsEnv('TYPEORM_CONNECTION')}`,
+            host: `${getOsEnv('TYPEORM_HOST')}`,
+            port: `${getOsEnv('TYPEORM_PORT')}`,
+            username: `${getOsEnv('TYPEORM_USERNAME')}`,
+            password: `${getOsEnv('TYPEORM_PASSWORD')}`,
+            database: `${getOsEnv('TYPEORM_DATABASE')}`,
+            synchronize: toBool(`${getOsEnv('TYPEORM_SYNCHRONIZE')}`),
+            logging: toBool(`${getOsEnv('TYPEORM_LOGGING')}`),
+        }
+
 
     }
 }
