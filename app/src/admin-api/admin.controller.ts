@@ -1,9 +1,15 @@
 import {ApiOperation, ApiResponse, ApiUseTags} from "@nestjs/swagger";
-import {Body, Controller, Post} from "@nestjs/common";
+import {Body, Controller, Get, Param, Post} from "@nestjs/common";
 import {AdminService} from "./admin.service";
-import {RequestAddProposalDTO, RequestGiveRightToVoteDTO, RequestRegisterContractDTO} from "../dto/transaction-controller.dto";
+import {
+    RequestAddProposalDTO,
+    RequestGiveRightToVoteDTO,
+    RequestRegisterContractDTO,
+    RequestVoteDetailDTO
+} from "../dto/transaction-controller.dto";
 import {IEbfContractRegisterResponse, IEbfSendTransactionResponse
 } from "../external-transaction/dto/ebf-external-transaction.dto";
+import {VoteEntity} from "./vote.entity";
 
 @ApiUseTags('Admin API')
 @Controller()
@@ -12,11 +18,49 @@ export class AdminController {
         private readonly adminService: AdminService,
     ) {
     }
+    @Get('/getUserVotedInfo/:id')
+    async getUserVotedInfo(@Param('id')  id: string): Promise<JSON> {
+        return await this.adminService.getUserVotedInfo(id);
+    }
+
+    @ApiOperation({title: 'get all votes'})
+    @ApiResponse({ status: 201, description: 'Success' })
+    @Get('/getVoteCount/:votename')
+    public async getVoteCount(@Param('votename') votename: string): Promise<number> {
+        return await this.adminService.getVoteCount(votename);
+    }
+
+    @ApiOperation({title: 'get all votes'})
+    @ApiResponse({ status: 201, description: 'Success' })
+    @Get('/getTotalVoteCount')
+    public async getTotalVoteCount(): Promise<number[]> {
+        let list = await this.adminService.getAllVotes();
+        let returnData = [];
+        for(let i=0; i<list.length; i++) {
+            returnData[i] = await this.adminService.getVoteCount(list[i].votename);
+        }
+        return returnData;
+    }
+
+    @ApiOperation({title: 'get all votes'})
+    @ApiResponse({ status: 201, description: 'Success' })
+    @Get('/getAllVotes')
+    public async getAllVotes(): Promise<VoteEntity[]> {
+        return await this.adminService.getAllVotes();
+    }
+
+    @ApiOperation({title: 'get vote details'})
+    @ApiResponse({ status: 201, description: 'Success' })
+    @Get('/getVoteDetail/:votename')
+    public async getVoteDetail(@Param('votename') votename: string): Promise<VoteEntity> {
+        return await this.adminService.getVoteDetail(votename);
+    }
+
     @ApiOperation({ title: 'Vote 생성' })
     @ApiResponse({ status: 201, description: 'Success' })
     @Post('/deployVote')
     public async deployVote(@Body() requestRegisterContractDTO:RequestRegisterContractDTO): Promise<IEbfContractRegisterResponse> {
-        return await this.adminService.deployVote(requestRegisterContractDTO.adminId, requestRegisterContractDTO.contractName, requestRegisterContractDTO.description);
+        return await this.adminService.deployVote(requestRegisterContractDTO.adminId, requestRegisterContractDTO.contractName, requestRegisterContractDTO.description, requestRegisterContractDTO.proposals, requestRegisterContractDTO.date);
     }
 
     // SendTransaction functions

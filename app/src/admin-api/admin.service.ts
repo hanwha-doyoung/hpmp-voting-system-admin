@@ -21,10 +21,25 @@ export class AdminService {
         this.userRepository = userRepository;
     }
 
+    public async getVoteCount(voteName: string): Promise<number> {
+        let vote = await this.findVote(voteName);
+        return vote.count;
+    }
+
+    public async countUp(voteName: string) {
+        let vote = await this.findVote(voteName);
+        let up = vote.count + 1;
+        this.voteRepository.save(<VoteEntity> {
+            votename: vote.votename,
+            description: vote.description,
+            contractaddress: vote.contractaddress,
+            count: up,
+        })
+    }
     /**
      * Vote 생성
      */
-    public async deployVote(adminId: string, contractName: string, description: string): Promise<IEbfContractRegisterResponse> {
+    public async deployVote(adminId: string, contractName: string, description: string, proposals: string[], date: string): Promise<IEbfContractRegisterResponse> {
         let admin = await this.findOne(adminId);
         let param = <IEbfContractRegisterRequest<object>> {
             encodedKeystore: admin.encodedkeystore,
@@ -32,16 +47,19 @@ export class AdminService {
             contractName: contractName,
             abi: admin.abi,
             bytecode: admin.bytecode,
-            constructArgs: {},
+            constructArgs: {
+                input: proposals
+            },
             value: 0
         }
 
         let result = <IEbfContractRegisterResponse> await this.ebfExternalTransactionService.sendRegistTransaction(param);
-
         await this.saveVote(<VoteEntity>{
             votename: contractName,
             description: description,
             contractaddress: result.contractAddress,
+            count: 0,
+            end: new Date(date),
         });
         return result;
     }
@@ -78,17 +96,30 @@ export class AdminService {
             value: "0",
             contractAddress: vote.contractaddress,
         }
+        console.log(param);
         return <IEbfSendTransactionResponse> await this.ebfExternalTransactionService.sendTransaction(contractName, 'giveRightToVote', param);
 
     }
 
     // DB Queries
 
+    public async getUserVotedInfo(id: string): Promise<JSON> {
+        let info = await this.userRepository.findOne({userid: id});
+        return info.voted;
+    }
+    public async getAllVotes(): Promise<VoteEntity[]>{
+        return await this.voteRepository.find();
+    }
+
+    public async getVoteDetail(votename: string): Promise<VoteEntity> {
+        return await this.voteRepository.findOne({votename: votename});
+    }
+
     public async findOne(id: string): Promise<AdminEntity> {
         return await this.adminRepository.findOne({adminid: id});
     }
 
-    public async findVote(name: string): Promise<VoteEntity > {
+    public async findVote(name: string): Promise<VoteEntity> {
         return await this.voteRepository.findOne({votename: name});
     }
 

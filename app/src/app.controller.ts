@@ -1,9 +1,21 @@
-import {Body, Controller, Post, UseGuards, Request, Get, Req} from '@nestjs/common';
+import {Body, Controller, Post, UseGuards, Request, Get, Req, Param} from '@nestjs/common';
 import { AppService } from './app.service';
 import {ApiOperation, ApiResponse, ApiUseTags} from "@nestjs/swagger";
-import {RequestGetNumberOfProposalsDTO, RequestGetProposalNameDTO, RequestGetProposalVoteCountDTO,
-  RequestWinnerNameDTO, RequestWinnerProposalDTO, ResponseGetNumberOfProposalsDTO, ResponseGetProposalNameDTO,
-  ResponseGetProposalVoteCountDTO, ResponseWinnerNameDTO, ResponseWinnerProposalDTO} from "./dto/transaction-controller.dto";
+import {
+  RequestGetNumberOfProposalsDTO,
+  RequestGetProposalNameDTO,
+  RequestGetProposalVoteCountDTO,
+  RequestLoginDTO,
+  RequestWinnerNameDTO,
+  RequestWinnerProposalDTO,
+  ResponseGetAllProposalsDTO, ResponseGetAllProposalVoteCountDTO,
+  ResponseGetNumberOfProposalsDTO,
+  ResponseGetProposalNameDTO,
+  ResponseGetProposalVoteCountDTO, ResponseGetTotalVoteCountDTO,
+  ResponseLoginDTO,
+  ResponseWinnerNameDTO,
+  ResponseWinnerProposalDTO
+} from "./dto/transaction-controller.dto";
 import {EbfExternalTransactionMapper} from "./external-transaction/ebf-external-transaction.mapper";
 import {AuthService} from "./auth/auth.service";
 
@@ -16,10 +28,25 @@ export class AppController {
   ) {}
 
   @Post('auth/login')
-  async login(@Request() req) {
-    console.log(req.body);
-    return this.authService.validateUser(req.body.userid, req.body.password);
+  async login(@Body() requestLoginDTO: RequestLoginDTO): Promise<ResponseLoginDTO> {
+    let result = await this.authService.validateUser(requestLoginDTO.username, requestLoginDTO.password);
+    return (<ResponseLoginDTO> {
+      userId: result.userid,
+      isAdmin: result.isadmin,
+      userName: result.username,
+      voted: result.voted
+    });
   }
+
+  @ApiOperation({title: '전체 proposal 확인'})
+  @ApiResponse({ status: 201, description: 'Success' })
+  @Get('/getAllProposals/:votename')
+  public async getAllProposals(
+     @Param('votename') votename: string): Promise<ResponseGetAllProposalsDTO> {
+    return EbfExternalTransactionMapper.toGetAllProposalsDTO(await this.appService.getAllProposals(votename));
+  }
+
+  //TODO : 전체 투표 수 가져오기
 
   @ApiOperation({title: 'proposal 이름'})
   @ApiResponse({ status: 201, description: 'Success' })
@@ -41,13 +68,20 @@ export class AppController {
     return EbfExternalTransactionMapper.toGetProposalVoteCountDTO(await this.appService.getProposalVoteCount(contractName, parameters));
   }
 
+  @ApiOperation({title: '전체 proposal 확인'})
+  @ApiResponse({ status: 201, description: 'Success' })
+  @Get('/getAllProposalVoteCount/:votename')
+  public async getAllProposalVoteCount(
+      @Param('votename') votename: string): Promise<ResponseGetAllProposalVoteCountDTO> {
+    return EbfExternalTransactionMapper.toGetAllProposalVoteCountDTO(await this.appService.getAllProposalVoteCount(votename));
+  }
+
   @ApiOperation({title: '전체 proposal의 수 확인'})
   @ApiResponse({ status: 201, description: 'Success' })
   @Post('/getNumberOfProposals')
   public async getNumberOfProposals(
       @Body() requestGetNumberOfProposalsDTO:RequestGetNumberOfProposalsDTO): Promise<ResponseGetNumberOfProposalsDTO> {
     const contractName = requestGetNumberOfProposalsDTO.contractName;
-    const parameters = requestGetNumberOfProposalsDTO.parameters;
     return EbfExternalTransactionMapper.toGetNumberOfProposalsDTO(await this.appService.getNumberOfProposals(contractName));
   }
 

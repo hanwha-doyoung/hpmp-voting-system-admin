@@ -13,6 +13,13 @@ export class UsersController {
     ) {
         this.userService = userService;
     }
+
+    @Get(':id/:contractName')
+    async getVotedInfo(@Param('id')  id: string, @Param('contractName') contractName: string): Promise<boolean> {
+        return await this.userService.getVotedInfo(id, contractName);
+    }
+
+
     @ApiOperation({title: 'vote'})
     @ApiResponse({ status: 201, description: 'Success' })
     @Post('/vote')

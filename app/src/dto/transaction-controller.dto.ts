@@ -2,6 +2,40 @@ import { IsNotEmpty, IsString, IsBase64 } from 'class-validator';
 import { Expose } from 'class-transformer';
 import {ApiModelProperty} from '@nestjs/swagger';
 
+export class RequestLoginDTO {
+    @Expose()
+    @ApiModelProperty({
+        required: true,
+        description: 'userId',
+        example: 'james'
+    })
+    public username: string;
+
+    @Expose()
+    @ApiModelProperty({
+        required: true,
+        description: 'password',
+        example: '1234'
+    })
+    public password: string;
+}
+
+export class ResponseLoginDTO {
+    userId: string;
+    isAdmin: boolean;
+    userName: string;
+    voted: JSON;
+}
+
+export class RequestVoteDetailDTO {
+    @Expose()
+    @ApiModelProperty({
+        required: true,
+        description: 'votename',
+        example: 'vote1'
+    })
+    public votename: string;
+}
 export class RequestRegisterContractDTO {
     @Expose()
     @ApiModelProperty({
@@ -32,6 +66,24 @@ export class RequestRegisterContractDTO {
     @IsNotEmpty()
     @IsString()
     public description: string;
+
+    @Expose()
+    @ApiModelProperty({
+        required: true,
+        description: 'Proposals',
+        example: '["Alice", "Peter", "James"]'
+    })
+    @IsNotEmpty()
+    public proposals: string[];
+
+    @Expose()
+    @ApiModelProperty({
+        required: true,
+        description: 'end date',
+        example: '2021-04-30'
+    })
+    @IsNotEmpty()
+    public date: string;
 }
 
 export class RequestAddProposalDTO {
@@ -299,24 +351,29 @@ export class ResponseGetProposalVoteCountDTO {
 }
 
 export class RequestGetNumberOfProposalsDTO {
-        @ApiModelProperty({
-        required: true,
-        description: 'Deployed contract name',
-        example: 'Vote10'
+    @ApiModelProperty({
+    required: true,
+    description: 'Deployed contract name',
+    example: 'Vote10'
     })
     @Expose()
     contractName: string;
-
-    @ApiModelProperty({
-        description: 'Parameters',
-        example: "1"
-    })
-    @Expose()
-    parameters: string;
 }
 
 export class ResponseGetNumberOfProposalsDTO {
     number: number;
+}
+
+export class ResponseGetAllProposalsDTO {
+    proposals: string[];
+}
+
+export class ResponseGetTotalVoteCountDTO {
+    count: number;
+}
+
+export class ResponseGetAllProposalVoteCountDTO {
+    results: string[];
 }
 
 export class RequestWinnerProposalDTO {

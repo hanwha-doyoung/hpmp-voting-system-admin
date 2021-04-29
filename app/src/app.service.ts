@@ -11,6 +11,19 @@ export class AppService {
   ){
     this.adminService = adminService;
   }
+
+  /**
+   * getAllProposals
+   * @param contractName
+   */
+  public async getAllProposals(contractName: string): Promise<IEbfSendViewResponse> {
+    let vote = await this.adminService.findVote(contractName);
+    let param = <IEbfSendViewRequest<object>> {
+      contractAddress: vote.contractaddress,
+    }
+    return <IEbfSendViewResponse> await this.ebfExternalTransactionService.sendView(contractName, 'getAllProposals', param);
+  }
+
   /**
    * getProposalName
    * @param contractName
@@ -37,6 +50,18 @@ export class AppService {
       contractAddress: vote.contractaddress,
     }
     return <IEbfSendViewResponse> await this.ebfExternalTransactionService.sendView(contractName, 'getProposalVoteCount', param);
+  }
+
+  /**
+   * getAllProposals
+   * @param contractName
+   */
+  public async getAllProposalVoteCount(contractName: string): Promise<IEbfSendViewResponse> {
+    let vote = await this.adminService.findVote(contractName);
+    let param = <IEbfSendViewRequest<object>> {
+      contractAddress: vote.contractaddress,
+    }
+    return <IEbfSendViewResponse> await this.ebfExternalTransactionService.sendView(contractName, 'getAllProposalVoteCount', param);
   }
 
   /**

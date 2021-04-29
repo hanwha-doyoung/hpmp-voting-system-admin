@@ -17,6 +17,11 @@ export class UsersService {
         this.adminService = adminService;
     }
 
+    public async getVotedInfo(id: string, contractName: string): Promise<boolean> {
+        let user: UserEntity = await this.userRepository.findOne({userid: id});
+        return user.voted[contractName];
+    }
+
     /**
      * vote
      * @param contractName
@@ -36,6 +41,7 @@ export class UsersService {
 
         await this.adminService.giveRightToVote("admin", contractName, account.address);
         await this.markVoted(userid, vote.votename);
+        await this.adminService.countUp(vote.votename);
         return <IEbfSendTransactionResponse> await this.ebfExternalTransactionService.sendTransaction(contractName, 'vote', param);
     }
 
@@ -80,5 +86,9 @@ export class UsersService {
             voted: voteInfo,
         })
     }
+
+    // async countUp(voteName: string): Promise<void> {
+    //     let vote = await this.
+    // }
 
 }

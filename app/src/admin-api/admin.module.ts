@@ -12,7 +12,7 @@ import {UserEntity} from "../users/user.entity";
     imports: [
         TypeOrmModule.forFeature([AdminEntity, VoteEntity, UserEntity]),
         ConfigModule,
-        ExternalTransactionModule
+        ExternalTransactionModule,
     ],
     controllers: [AdminController],
     providers: [AdminService],

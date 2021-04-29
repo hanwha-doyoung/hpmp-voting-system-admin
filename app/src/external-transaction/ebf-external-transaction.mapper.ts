@@ -1,4 +1,5 @@
 import {
+    ResponseGetAllProposalsDTO, ResponseGetAllProposalVoteCountDTO,
     ResponseGetChairpersonDTO, ResponseGetNumberOfProposalsDTO,
     ResponseGetProposalNameDTO, ResponseGetProposalVoteCountDTO,
     ResponseGetVoteDTO,
@@ -21,6 +22,18 @@ export class EbfExternalTransactionMapper {
     public static toGetVoteDTO(iEbfSendViewResponse: IEbfSendViewResponse): ResponseGetVoteDTO {
         return <ResponseGetVoteDTO> {
             index: iEbfSendViewResponse.result
+        }
+    }
+
+    public static toGetAllProposalsDTO(iEbfSendViewResponse: IEbfSendViewResponse): ResponseGetAllProposalsDTO {
+        return <ResponseGetAllProposalsDTO> {
+            proposals: iEbfSendViewResponse.result
+        }
+    }
+
+    public static toGetAllProposalVoteCountDTO(iEbfSendViewResponse: IEbfSendViewResponse): ResponseGetAllProposalVoteCountDTO {
+        return <ResponseGetAllProposalVoteCountDTO> {
+            results: iEbfSendViewResponse.result
         }
     }
 
