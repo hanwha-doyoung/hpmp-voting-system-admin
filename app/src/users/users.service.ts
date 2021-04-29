@@ -82,13 +82,9 @@ export class UsersService {
             userid: account.userid,
             password: account.password,
             isadmin: account.isadmin,
-            username: account.userid,
+            username: account.username,
             voted: voteInfo,
         })
     }
-
-    // async countUp(voteName: string): Promise<void> {
-    //     let vote = await this.
-    // }
 
 }
